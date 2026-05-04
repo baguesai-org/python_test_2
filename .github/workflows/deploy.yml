@@ -1,0 +1,22 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-test:
+    name: Deploy -> test
+    runs-on: self-hosted
+    steps:
+      - name: baguesctl deploy test
+        run: sudo /usr/local/bin/baguesctl app:deploy python_test_2 --env test
+
+  deploy-prod:
+    name: Deploy -> prod
+    runs-on: self-hosted
+    needs: deploy-test
+    environment: production
+    steps:
+      - name: baguesctl deploy prod
+        run: sudo /usr/local/bin/baguesctl app:deploy python_test_2 --env prod
