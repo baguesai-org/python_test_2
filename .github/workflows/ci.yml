@@ -1,0 +1,32 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    name: ci
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check no hardcoded secrets
+        run: |
+          if grep -rE "(password|secret|api_key|token)\s*=\s*['\"][^'\"]{8,}" \
+            --include="*.py" --include="*.js" --include="*.ts" \
+            --exclude-dir=node_modules --exclude-dir=.venv --exclude-dir=.git \
+            --exclude="*.example" --exclude="*.test.*" . 2>/dev/null; then
+            echo "Possible hardcoded secrets"; exit 1
+          fi
+      - name: Install
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install --upgrade pip
+          if [ -f requirements.txt ]; then .venv/bin/pip install -r requirements.txt; fi
+      - name: Lint
+        run: .venv/bin/pip install ruff 2>/dev/null; .venv/bin/ruff check . --exit-zero || true
+      - name: Test
+        run: |
+          if [ -d tests ] || [ -f pytest.ini ] || [ -f pyproject.toml ]; then
+            .venv/bin/pip install pytest; .venv/bin/pytest --tb=short
+          fi
