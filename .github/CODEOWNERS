@@ -1,0 +1,6 @@
+# Owners globales
+* @baguesai @natanjabie
+
+# Archivos críticos - solo admins
+.github/workflows/ @baguesai @natanjabie
+deploy.config.json @baguesai @natanjabie
